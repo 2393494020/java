@@ -4,17 +4,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ConcurrencyApp {
-    private Logger logger = LoggerFactory.getLogger(getClass());
-    // private AtomicInteger count = new AtomicInteger(0);
-    private int count;
+    private static Logger logger = LoggerFactory.getLogger(ConcurrencyApp.class);
+    private AtomicInteger atomCount = new AtomicInteger(0);
+    private int count = 0;
+    private ReentrantLock lock = new ReentrantLock(true);
 
-    private /*synchronized*/ void increace() {
+    private /*synchronized*/ void increase() {
         for (int i = 1; i <= 10; i++) {
+            lock.lock();
             count++;
+            lock.unlock();
             try {
-                Thread.sleep(10);
+                Thread.sleep(5);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -22,16 +26,22 @@ public class ConcurrencyApp {
         }
     }
 
+    private void increaseAtom() {
+        for (int i = 1; i <= 10; i++) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            logger.info((Thread.currentThread().getName() + ":" + atomCount.incrementAndGet()));
+        }
+    }
+
     public static void main(String[] args) {
         ConcurrencyApp app = new ConcurrencyApp();
-        Thread threads[] = new Thread[5];
+        Thread[] threads = new Thread[10];
         for (int i = 0; i < threads.length; i++) {
-            threads[i] = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    app.increace();
-                }
-            });
+            threads[i] = new Thread(app::increase);
             threads[i].start();
         }
     }
