@@ -69,7 +69,7 @@ public class ConcurrencyApp {
 
         Thread t2 = new Thread(() -> {
             try {
-                Thread.sleep(1);
+                Thread.sleep(100);
                 app.add = false;
             } catch (InterruptedException e) {
                 e.printStackTrace();
