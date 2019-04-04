@@ -3,82 +3,87 @@ package org.who;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ConcurrencyApp {
     private static Logger logger = LoggerFactory.getLogger(ConcurrencyApp.class);
+    private int count = 0;
     private AtomicInteger atomCount = new AtomicInteger(0);
-    private volatile int count = 0;
     private volatile boolean add = true;
-    // private ReentrantLock lock = new ReentrantLock(true);
-
-    private int getCount() {
-        return count;
-    }
+    private ReentrantLock lock = new ReentrantLock(true);
 
     private void increase() {
-//        count++;
-//        logger.info(Thread.currentThread().getName() + ":" + count);
+        count++;
+    }
+
+    private void increase0() {
         for (int i = 1; i <= 10000; i++) {
             count++;
-//            try {
-//                Thread.sleep(5);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-            // logger.info(Thread.currentThread().getName() + ":" + count);
+            System.out.println(count);
+        }
+    }
+
+    private void increase1() {
+        for (int i = 1; i <= 10000; i++) {
+            synchronized (this) {
+                count++;
+            }
+        }
+    }
+
+    private void increase2() {
+        for (int i = 1; i <= 10000; i++) {
+            lock.lock();
+            count++;
+            lock.unlock();
         }
     }
 
     private void increaseAtom() {
         for (int i = 1; i <= 10000; i++) {
             atomCount.incrementAndGet();
-//            try {
-//                Thread.sleep(10);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//            logger.info((Thread.currentThread().getName() + ":" + atomCount.incrementAndGet()));
         }
     }
 
     public static void main(String[] args) {
-        final ConcurrencyApp app = new ConcurrencyApp();
-        List<Thread> threads = new ArrayList<>();
+        ConcurrencyApp app = new ConcurrencyApp();
+        /*List<Thread> threads = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
-            threads.add(new Thread(app::increaseAtom));
+            threads.add(new Thread(app::increase2));
         }
         threads.forEach(Thread::start);
-
-//        new Thread(() -> {
-//            while (app.add)
-//                app.increase();
-//        }).start();
-//
-//        new Thread(() -> {
-//            try {
-//                Thread.sleep(50);
-//                app.add = false;
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }).start();
-//
-//        try {
-//            Thread.sleep(45);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-
+        // 等待线程结束
         threads.forEach(thread -> {
             try {
                 thread.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        });*/
+
+        Thread t1 = new Thread(() -> {
+            while (app.add)
+                app.increase();
         });
-        logger.info(Thread.currentThread().getName() + ":" + app.atomCount.get());
+
+        Thread t2 = new Thread(() -> {
+            try {
+                Thread.sleep(1);
+                app.add = false;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+
+        t1.start();
+        t2.start();
+        try {
+            t1.join();
+            t2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        logger.info("" + app.count);
     }
 }

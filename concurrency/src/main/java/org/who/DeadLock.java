@@ -33,7 +33,7 @@ public class DeadLock {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main0(String[] args) {
         Thread thread1 = new Thread(DeadLock::method1);
         Thread thread2 = new Thread(DeadLock::method2);
 
