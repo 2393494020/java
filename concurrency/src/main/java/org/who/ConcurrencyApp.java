@@ -10,7 +10,7 @@ public class ConcurrencyApp {
     private static Logger logger = LoggerFactory.getLogger(ConcurrencyApp.class);
     private int count = 0;
     private AtomicInteger atomCount = new AtomicInteger(0);
-    private boolean add = true;
+    private /*volatile*/ boolean add = true;
     private ReentrantLock lock = new ReentrantLock(true);
 
     private void increase() {
