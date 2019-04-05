@@ -3,15 +3,22 @@ package org.who;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * synchronized jvm auto freed when exception
+ * ReentrantLock manual freed
+ */
 public class ConcurrencyApp {
     private static Logger logger = LoggerFactory.getLogger(ConcurrencyApp.class);
     private int count = 0;
     private AtomicInteger atomCount = new AtomicInteger(0);
     private /*volatile*/ boolean add = true;
-    private ReentrantLock lock = new ReentrantLock(true);
+    private Lock lock = new ReentrantLock(true);
 
     private void increase() {
         count++;
@@ -20,7 +27,6 @@ public class ConcurrencyApp {
     private void increase0() {
         for (int i = 1; i <= 10000; i++) {
             count++;
-            System.out.println(count);
         }
     }
 
@@ -33,9 +39,15 @@ public class ConcurrencyApp {
     }
 
     private void increase2() {
-        for (int i = 1; i <= 10000; i++) {
+        try {
             lock.lock();
-            count++;
+            for (int i = 1; i <= 10000; i++) {
+                count++;
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
             lock.unlock();
         }
     }
@@ -47,10 +59,10 @@ public class ConcurrencyApp {
     }
 
     public static void main(String[] args) {
-        ConcurrencyApp app = new ConcurrencyApp();
-        /*List<Thread> threads = new ArrayList<>();
+        final ConcurrencyApp app = new ConcurrencyApp();
+        List<Thread> threads = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
-            threads.add(new Thread(app::increase2));
+            threads.add(new Thread(app::increase0));
         }
         threads.forEach(Thread::start);
         // 等待线程结束
@@ -60,9 +72,9 @@ public class ConcurrencyApp {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        });*/
+        });
 
-        Thread t1 = new Thread(() -> {
+        /*Thread t1 = new Thread(() -> {
             while (app.add)
                 app.increase();
         });
@@ -83,7 +95,7 @@ public class ConcurrencyApp {
             t2.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
         logger.info("" + app.count);
     }
 }
