@@ -1,5 +1,8 @@
 package org.who;
 
+/**
+ * 模拟死锁
+ */
 public class DeadLock {
     private static void method1() {
         synchronized (String.class) {
