@@ -18,7 +18,6 @@ public class ConcurrencyApp {
     private int count = 0;
     private AtomicInteger atomCount = new AtomicInteger(0);
     private /*volatile*/ boolean add = true;
-    private Lock lock = new ReentrantLock(true);
 
     private void increase() {
         count++;
@@ -35,20 +34,6 @@ public class ConcurrencyApp {
             synchronized (this) {
                 count++;
             }
-        }
-    }
-
-    private void increase2() {
-        try {
-            lock.lock();
-            for (int i = 1; i <= 10000; i++) {
-                count++;
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            lock.unlock();
         }
     }
 
