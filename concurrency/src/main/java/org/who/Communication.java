@@ -25,6 +25,7 @@ public class Communication {
                         }
                     }
                     System.out.println("t2 over");
+                    // 唤醒线程2
                     lock.notify();
                 }
             }
@@ -48,6 +49,7 @@ public class Communication {
                             // notify 不会释放锁
                             lock.notify();
                             try {
+                                // 释放锁,让线程1继续执行,等待线程1执行结束然后唤醒我
                                 lock.wait();
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
