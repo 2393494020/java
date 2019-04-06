@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 public class Communication {
     private volatile List<Integer> list = new ArrayList();
 
-    public static void main0(String[] args) {
+    public static void main(String[] args) {
         Object lock = new Object();
         Communication communication = new Communication();
         Thread t2 = new Thread(new Runnable() {
@@ -18,8 +18,8 @@ public class Communication {
                     System.out.println("t2启动");
                     if (communication.list.size() < 5) {
                         try {
+                            // wait 会释放锁
                             lock.wait();
-                            // wait 释放锁
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -65,9 +65,9 @@ public class Communication {
         t1.start();
     }
 
-    public static void main(String[] args) {
+    public static void main1(String[] args) {
         Communication communication = new Communication();
-        CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch latch = new CountDownLatch(1); // 加一把门栓
 
         Thread t2 = new Thread(new Runnable() {
             @Override
@@ -100,6 +100,7 @@ public class Communication {
                     System.out.println("t1-" + i);
                     if (communication.list.size()==5){
                         latch.countDown();
+                        // 门栓减为0,通知t2继续运行,自己也继续运行
                     }
                     try {
                         TimeUnit.SECONDS.sleep(1);

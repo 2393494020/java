@@ -10,14 +10,15 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * synchronized jvm auto freed when exception
- * ReentrantLock manual freed
+ * synchronized 发生异常 jvm 自动释放
+ * ReentrantLock 必须手动释放
  */
 public class ConcurrencyApp {
     private static Logger logger = LoggerFactory.getLogger(ConcurrencyApp.class);
     private int count = 0;
     private AtomicInteger atomCount = new AtomicInteger(0);
     private /*volatile*/ boolean add = true;
+    private Lock lock = new ReentrantLock();
 
     private void increase() {
         count++;
@@ -34,6 +35,14 @@ public class ConcurrencyApp {
             synchronized (this) {
                 count++;
             }
+        }
+    }
+
+    private void increase2() {
+        for (int i = 1; i <= 10000; i++) {
+            lock.lock();
+            count++;
+            lock.unlock();
         }
     }
 
