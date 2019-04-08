@@ -20,44 +20,43 @@ public class MyContainerAdvance<T> {
     private Condition consumerCondition = lock.newCondition();
 
     void put(T ele) {
-        lock.lock();
-        while (count == MAX_SIZE) {
-            try {
+        try {
+            lock.lock();
+            while (count == MAX_SIZE) {
                 logger.info(ele.toString() + " want join us, but container full");
                 producerCondition.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
+            container.add(ele);
+            ++count;
+            logger.info("put " + ele.toString() + ",count " + count);
+            consumerCondition.signalAll();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
         }
-        container.add(ele);
-        ++count;
-        logger.info("put " + ele.toString() + ",count " + count);
-        consumerCondition.signalAll();
-        lock.unlock();
     }
 
     T get() {
-        lock.lock();
-        try {
-            TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
         T ele = null;
-        while (count == 0) {
-            try {
+        try {
+            lock.lock();
+
+            Thread.sleep(200);
+
+            while (count == 0) {
                 logger.info(Thread.currentThread().getName() + " want take one ele, but container empty");
                 consumerCondition.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
+            ele = container.remove(0);
+            count--;
+            logger.info(Thread.currentThread().getName() + " take " + ele.toString() + ",count " + count);
+            producerCondition.signalAll();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
         }
-        ele = container.remove(0);
-        count--;
-        logger.info(Thread.currentThread().getName() + " take " + ele.toString() + ",count " + count);
-        producerCondition.signalAll();
-        lock.unlock();
         return ele;
     }
 
