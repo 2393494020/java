@@ -6,18 +6,25 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class MyContainer<T> {
-    private static Logger logger = LoggerFactory.getLogger(MyContainer.class);
+public class MyContainerAdvance<T> {
+    private static Logger logger = LoggerFactory.getLogger(MyContainerAdvance.class);
     private final List<T> container = new ArrayList<>();
     private static final int MAX_SIZE = 3;
     private int count = 0;
+    private Lock lock = new ReentrantLock(false);
+    private Condition producerCondition = lock.newCondition();
+    private Condition consumerCondition = lock.newCondition();
 
-    synchronized void put(T ele) {
+    void put(T ele) {
+        lock.lock();
         while (count == MAX_SIZE) {
             try {
                 logger.info(ele.toString() + " want join us, but container full");
-                this.wait();
+                producerCondition.await();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -25,10 +32,12 @@ public class MyContainer<T> {
         container.add(ele);
         ++count;
         logger.info("put " + ele.toString() + ",count " + count);
-        this.notifyAll();
+        consumerCondition.signalAll();
+        lock.unlock();
     }
 
-    synchronized T get() {
+    T get() {
+        lock.lock();
         try {
             TimeUnit.SECONDS.sleep(1);
         } catch (InterruptedException e) {
@@ -39,7 +48,7 @@ public class MyContainer<T> {
         while (count == 0) {
             try {
                 logger.info(Thread.currentThread().getName() + " want take one ele, but container empty");
-                this.wait();
+                consumerCondition.await();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -47,7 +56,8 @@ public class MyContainer<T> {
         ele = container.remove(0);
         count--;
         logger.info(Thread.currentThread().getName() + " take " + ele.toString() + ",count " + count);
-        this.notifyAll();
+        producerCondition.signalAll();
+        lock.unlock();
         return ele;
     }
 
@@ -56,7 +66,7 @@ public class MyContainer<T> {
     }
 
     public static void main(String[] args) {
-        MyContainer<String> container = new MyContainer();
+        MyContainerAdvance<String> container = new MyContainerAdvance();
         List<Thread> producerList = new ArrayList<>();
 
         for (int i = 1; i <= 10; i++) {
@@ -72,9 +82,9 @@ public class MyContainer<T> {
 
         producerList.forEach(t -> t.start());
 
-        for (int j = 1; j <= 9; j++) {
+        for (int j = 1; j <= 8; j++) {
             try {
-                TimeUnit.SECONDS.sleep(1);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
