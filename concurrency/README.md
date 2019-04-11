@@ -11,3 +11,30 @@
 
 # volatile
 https://www.cnblogs.com/dolphin0520/p/3920373.html
+
+# 多线程面试题
+http://www.threadworld.cn/archives/99.html
+
+
+# io
+https://blog.csdn.net/baiye_xing/article/details/74331041
+
+# socket
+https://blog.csdn.net/weixin_39634961/article/details/80236161
+
+## bio
+https://blog.csdn.net/skiof007/article/details/52873421
+
+## nio
+https://www.cnblogs.com/geason/p/5774096.html  
+https://javadoop.com/post/java-nio  
+http://www.importnew.com/26368.html  
+
+## aio
+aio(linux 不支持)
+
+## epoll
+
+## selector
+
+## reactor

@@ -18,6 +18,8 @@
     <modules>
         <module>common</module>
         <module>concurrency</module>
+        <module>dp</module>
+        <module>leetcode</module>
     </modules>
 
     <build>
