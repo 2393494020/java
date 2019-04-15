@@ -21,7 +21,7 @@ public class ProxyTest {
     @Test
     public void testDynamicProxy() {
         Producer carProducer = new CarProducer();
-        Producer producer = wrap1(carProducer);
+        Producer producer = wrap2(carProducer);
         producer.produce();
     }
     // http://www.importnew.com/23301.html

@@ -8,6 +8,7 @@ public class TicketSeller {
 
     static {
         for (int i = 1; i <= 10000; i++) {
+            // ticketQueue.offer(""); 队列满了不会报错
             ticketQueue.add("票 - " + i);
         }
     }
