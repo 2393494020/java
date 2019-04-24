@@ -3,7 +3,7 @@ package org.who.rpc;
 import java.io.IOException;
 
 public interface Server {
-    void start();
+    void start() throws IOException;
 
     void stop() throws IOException;
 
