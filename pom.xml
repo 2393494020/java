@@ -19,6 +19,7 @@
         <module>common</module>
         <module>concurrency</module>
         <module>dp</module>
+        <module>hadoop</module>
         <module>leetcode</module>
     </modules>
 
