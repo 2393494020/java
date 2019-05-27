@@ -5,6 +5,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FsStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 
@@ -15,9 +16,12 @@ import java.net.URISyntaxException;
 @Slf4j
 public class HdfsFileUtil {
     public static void main(String[] args) throws URISyntaxException, IOException {
-        FileSystem fileSystem = new DistributedFileSystem();
-        fileSystem.initialize(new URI("hdfs", null, "//localhost:9000", null, null), new Configuration());
+        Configuration configuration = new Configuration();
 
-        log.info("success");
+        FileSystem fileSystem = new DistributedFileSystem();
+        fileSystem.initialize(new URI("hdfs", null, "//localhost:9000", null, null), configuration);
+        FsStatus status = fileSystem.getStatus(new Path("/"));
+
+        log.info("capacity {}", status.getCapacity());
     }
 }
